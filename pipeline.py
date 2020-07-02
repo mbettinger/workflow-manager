@@ -1,6 +1,6 @@
-from workflow.step import Step
-from workflow.metastep import MetaStep
-from workflow.data import Data
+from workflow_manager.step import Step
+from workflow_manager.metastep import MetaStep
+from workflow_manager.data import Data
 import copy
 class Pipeline():
     """
@@ -23,19 +23,19 @@ class Pipeline():
             if type(step) is not list:
                 step=[step]
 
-            if n_jobs == -1:
-                temp_containers=[Data.rel_deep_copy(container) for container in data_containers]
-                data_variants = [step_variant.run(temp_containers,n_jobs) for step_variant in step] # deepcopy for different subworkflow dataspaces
-            else:
-                assert n_jobs>=1
+            temp_containers=[Data.rel_deep_copy(container) if type(container) is not str else container for container in data_containers]
 
-                temp_containers=[Data.rel_deep_copy(container) if type(container) is not str else container for container in data_containers]
+            # is_metastep=lambda substep,rec: type(substep) is MetaStep or (type(substep) is Pipeline and any([rec(st, rec) for st in substep.steps]))
+            # if n_jobs == -1 or any([is_metastep(substep, is_metastep) for substep in step]):
+            data_variants = [step_variant.run(temp_containers,n_jobs) for step_variant in step] # deepcopy for different subworkflow dataspaces
+            # else:
+            #     assert n_jobs>=1
 
-                data_variants=[]
-                while temp_containers!=[]:
-                    exec_variants,temp_containers = ([step_variant.run(temp_containers[0:min(n_jobs, len(temp_containers))],n_jobs) for step_variant in step],
-                                                    temp_containers[n_jobs:]) # deepcopy for different subworkflow dataspaces
-                    data_variants.extend(exec_variants)
+            #     data_variants=[]
+            #     while temp_containers!=[]:
+            #         exec_variants,temp_containers = ([step_variant.run(temp_containers[0:min(n_jobs, len(temp_containers))],n_jobs) for step_variant in step],
+            #                                         temp_containers[n_jobs:]) # deepcopy for different subworkflow dataspaces
+            #         data_variants.extend(exec_variants)
                 
             # Flatten containers lists created by variants
             data_containers=[]

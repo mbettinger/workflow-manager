@@ -1,5 +1,5 @@
 from workflow.data import Data
-
+import os
 class MetaStep():
     """
     Enables to manipulate execution dataspaces.
@@ -36,15 +36,15 @@ class MetaStep():
             for param_key in param_variant:
                 nargs[param_key]=param_variant[param_key]
 
-            data_containers=[Data.from_file(data_container) if type(data_container) is str else data_container for data_container in data_containers]
+            temp_containers=[Data.from_file(data_container) if type(data_container) is str else data_container for data_container in data_containers]
 
             # Running function and collecting outputs
             for funct in self.function:
-                funct_container=funct(data_containers, **nargs)
+                funct_container=funct(temp_containers, **nargs)
                 if n_jobs!=-1:
                     funct_container=[container.to_file("Data_"+funct.__name__.replace("<","").replace(">","")+str(index)) for index, container in enumerate(funct_container)]
                 variants_containers.extend(funct_container)
-
+        [os.remove(data_container) for data_container in data_containers if type(data_container) is str]
         return variants_containers
 
     def __repr__(self):
