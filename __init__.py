@@ -1,5 +1,5 @@
-import workflow.data
-import workflow.pipeline
-import workflow.step
-import workflow.metastep
-import workflow.meta
+import workflow_manager.data
+import workflow_manager.pipeline
+import workflow_manager.step
+import workflow_manager.metastep
+import workflow_manager.meta
