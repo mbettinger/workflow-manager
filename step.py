@@ -1,4 +1,4 @@
-from workflow.data import Data
+from workflow_manager.data import Data
 import inspect
 import types
 import copy
