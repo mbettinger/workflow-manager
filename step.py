@@ -3,7 +3,6 @@ import inspect
 import types
 import copy
 import datetime
-import util
 import itertools
 import progressbar
 import os
@@ -145,7 +144,7 @@ class Step():
                     mem_functs=self.function
                     self.params=param_variant
                     if isinstance(funct, types.LambdaType) and funct.__name__ == "<lambda>":
-                        self.function=[util.lambda_function]
+                        self.function=["lambda"]
                     else:
                         self.function=[funct]
                     step_variant=copy.deepcopy(self)
