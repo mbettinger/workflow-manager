@@ -1,4 +1,5 @@
 from workflow_manager.data import Data
+from workflow_manager.temporizer import *
 import inspect
 import types
 import copy
@@ -102,7 +103,7 @@ class Step():
                         elif output is not None:
                             assert len(self.outputs)==1
                             output=[output]
-               # Collecting input values from container
+                # Collecting input values from container
                 for data_container in progressbar.progressbar(data_containers):
                     if type(data_container) is str:
                         data_container=Data.from_file(data_container)
@@ -112,7 +113,7 @@ class Step():
 
                     args=[]
                     for input_key in self.args:
-                        args.append(data_container[input_key])
+                        args.append(exec_just_in_time(data_container[input_key]))
 
                     funct_container=Data.rel_deep_copy(data_container)
 
@@ -121,8 +122,12 @@ class Step():
 
                     if not self.keep_inputs:
                         for input_key in self.args:
+                            if input_key in funct_container.read_only:
+                                funct_container.read_only.remove(input_key)
                             funct_container.pop(input_key)
                         for input_key in self.nargs:
+                            if input_key in funct_container.read_only:
+                                funct_container.read_only.remove(input_key)
                             funct_container.pop(input_key)
 
                     if self.outputs is not None:
@@ -163,4 +168,4 @@ class Step():
         return variants_containers
 
     def __repr__(self):
-        return "Step(function = "+str([funct.__name__ for funct in self.function])+", args = "+ str(self.args) + ", nargs = " + str(self.nargs) + ", outputs = "+ str(self.outputs) + ", params = " + str(self.params) + ", keep_inputs = "+str(self.keep_inputs)+", name = "+self.name+")"
+        return "Step(function = "+str([funct.__name__ if callable(funct) else funct for funct in self.function])+", args = "+ str(self.args) + ", nargs = " + str(self.nargs) + ", outputs = "+ str(self.outputs) + ", params = " + str(self.params) + ", keep_inputs = "+str(self.keep_inputs)+", name = "+self.name+")"
